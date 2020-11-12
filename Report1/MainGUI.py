@@ -1,37 +1,7 @@
-import pymysql
-
 import sys, datetime
 from PyQt5.QtWidgets import *
+import Report1.DBSearch as DBSearch
 
-#DB 접근
-class DB_Utils:
-
-    def queryExecutor(self, db, sql, params):
-        conn = pymysql.connect(host='localhost', user='root', password='wjddus427', db='kleague', charset='utf8')
-
-        try:
-            with conn.cursor(pymysql.cursors.DictCursor) as cursor:     # dictionary based cursor
-                cursor.execute(sql, params)
-                tuples = cursor.fetchall()
-                return tuples
-        except Exception as e:
-            print(e)
-            print(type(e))
-        finally:
-            conn.close()
-
-    def updateExecutor(self, db, sql, params):
-        conn = pymysql.connect(host='localhost', user='root', password='wjddus427', db=db, charset='utf8')
-
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute(sql, params)
-            conn.commit()
-        except Exception as e:
-            print(e)
-            print(type(e))
-        finally:
-            conn.close()
 
 #Main window구현
 class MainWindow(QWidget):
@@ -41,21 +11,13 @@ class MainWindow(QWidget):
 
     def setupUI(self):
         self.setWindowTitle("Report")
-        self.setGeometry(200, 200, 1200, 700)  # 위치, 크기 세팅
+        self.setGeometry(400, 200, 1100, 800)  # 위치, 크기 세팅
 
         # 기본적으로 필요한 모든 위젯 생성
 
-        # 선수검색 파트===================================================
-        """
-        1) 선수검색이라는 일반 라벨
-        2) 팀명 라벨, 팀명용 입력칸, 포지션 라벨, 포지션 입력칸, 출신국 라벨, 출신국 입력칸, 초기화 버튼
-        3) 키 라벨, 키용 입력칸, 이상 이하 체크버튼, 몸무게 라벨, 몸무게 입력칸, 이상 이하 체크버튼, 검색 버튼
-        4) 선수들 결과창
-        """
+        # 선수검색 파트====================================================
+
         # 라벨 모음
-        self.MainLabel1 = QLabel("선수검색")  # 선수검색
-        self.MainLabel1.move(200, 50)
-        self.MainLabel1.resize(100, 20)
         self.TeamnameLabel = QLabel("팀명 : ")  # 팀명
         self.PositionLabel = QLabel("포지션 : ")  # 포지션
         self.CountryLabel = QLabel("출신국 : ")  # 출신국
@@ -69,11 +31,6 @@ class MainWindow(QWidget):
         self.HeightCbbox = QComboBox(self)  # 키 콤보박스
         self.WeightCbbox = QComboBox(self)  # 몸무게 콤보박스
 
-        """
-        콤보박스에 내용물을 추가하는건 for문을 이용하여
-        self.Teamname.addItem('~~')식으로 하여 추가한다.
-        """
-
         # 푸시버튼 모음
         self.ResetBtn = QPushButton("초기화")  # 초기화 버튼
         self.searchBtn = QPushButton("검색")  # 검색 버튼
@@ -85,13 +42,6 @@ class MainWindow(QWidget):
         self.WeightDnBtn = QRadioButton("이하", self)  # 몸무게의 이하
 
         # 파일출력 파트 ===================================================
-        """
-        1) 파일출력이라는 일반 라벨
-        2) CSV, JSON, XML 선택 체크 버튼, 저장 버튼
-        """
-
-        # 라벨 모음
-        self.MainLabel2 = QLabel("파일출력")  # 파일출력
 
         # 라디오버튼 모음
         self.CsvRdbtn = QRadioButton("CSV", self)  # CSV
@@ -100,41 +50,83 @@ class MainWindow(QWidget):
 
         # 푸시버튼 모음
         self.SaveBtn = QPushButton("저장")  # 저장 버튼
-
-        # 콤보박스 설정
-        self.comboBox = QComboBox(self)
-
-        # DB 검색문 실행
-        query = DB_Query()
-        rows = query.selectPlayerPosition()        # rows은 dictionary의 리스트
-        # [{'position': 'DF'}, {'position': 'FW'}, {'position': None}, {'position': 'MF'}, {'position': 'GK'}]
-
-        columnName = list(rows[0].keys())[0]
-        items = ['없음' if row[columnName] == None else row[columnName] for row in rows]
-        self.comboBox.addItems(items)
-
-        # for row in rows:
-        #     item = list(row.values()).pop(0)
-        #     if item == None:
-        #         self.comboBox.addItem('없음')
-        #     else:
-        #         self.comboBox.addItem(item)
-
-        self.comboBox.move(300, 50)
-        self.comboBox.resize(100, 20)
-        self.comboBox.activated.connect(self.comboBox_Activated)
-
-        # 푸쉬버튼 설정
-        self.pushButton = QPushButton("Search", self)
-        self.pushButton.move(600, 50)
-        self.pushButton.resize(100, 20)
-        self.pushButton.clicked.connect(self.pushButton_Clicked)
+        #self.SaveBtn.clicked.connect(self.pushButton_Clicked)
 
         # 테이블위젯 설정
-        self.tableWidget = QTableWidget(self)   # QTableWidget 객체 생성
-        self.tableWidget.move(50, 100)
-        self.tableWidget.resize(1000, 500)
+        #self.tableWidget = QTableWidget(self)   # QTableWidget 객체 생성
+        #self.tableWidget.resize(1000, 500)
 
+        # 레이아웃 생성 ====================================================
+        #self.GroupBox1 = QGroupBox("선수검색") # 선수검색들 묶어둘 녀석
+
+        self.PlLayout1 = QHBoxLayout(self) #선수검색 첫번째줄(팀명~출신국 까지)
+        self.PlLayout1.addWidget(self.TeamnameLabel)
+        self.PlLayout1.addWidget(self.TeamnameCbbox)
+        self.PlLayout1.addWidget(self.PositionLabel)
+        self.PlLayout1.addWidget(self.PositionCbbox)
+        self.PlLayout1.addWidget(self.CountryLabel)
+        self.PlLayout1.addWidget(self.CountryCbbox)
+
+        self.PlLayout2 = QHBoxLayout(self) #선수검색 두번째줄(키~ 몸무게)
+        self.PlLayout2.addWidget(self.HeightLabel)
+        self.PlLayout2.addWidget(self.HeightCbbox)
+        self.PlLayout2.addWidget(self.HeightUpBtn)
+        self.PlLayout2.addWidget(self.HeightDnBtn)
+        self.PlLayout2.addWidget(self.WeightLabel)
+        self.PlLayout2.addWidget(self.WeightCbbox)
+        self.PlLayout2.addWidget(self.WeightUpBtn)
+        self.PlLayout2.addWidget(self.WeightDnBtn)
+
+        self.PlInputLayout = QHBoxLayout(self) #선수검색(입력용)
+        self.PlInputLayout.addLayout(self.PlLayout1)
+        self.PlInputLayout.addLayout(self.PlLayout2)
+
+        self.BtnLayout1 = QHBoxLayout(self) #선수검색 버튼 (리셋)
+        self.BtnLayout1.addWidget(self.ResetBtn)
+        self.BtnLayout2 = QHBoxLayout(self)
+        self.BtnLayout2.addWidget(self.searchBtn) #선수검색 버튼(검색)
+
+        self.PlBtnLayout= QVBoxLayout(self)
+        self.PlBtnLayout.addLayout(self.BtnLayout1)
+        self.PlBtnLayout.addLayout(self.BtnLayout2)
+
+        self.PlLayer= QHBoxLayout(self)
+        self.PlLayer.addLayout(self.PlInputLayout)
+        self.PlLayer.addLayout(self.PlBtnLayout)
+        #self.GroupBox1.setLayout(self.PlLayer)
+
+        #self.PLLayout = QHBoxLayout(self)
+        #self.PLLayout.addWidget(self.GroupBox1)
+
+        #self.TableLayout = QHBoxLayout(self) #결과창 나올부분
+        #self.TableLayout.addWidget(self.tableWidget)
+
+        #self.GroupBox2= QGroupBox("파일 출력")
+
+        self.FlLayout1= QHBoxLayout(self)
+        self.FlLayout1.addWidget(self.CsvRdbtn)
+        self.FlLayout1.addWidget(self.JsonRdbtn)
+        self.FlLayout1.addWidget(self.XmlRdbtn)
+        self.FlBtnLayout= QHBoxLayout(self)
+        self.FlBtnLayout.addWidget(self.SaveBtn)
+
+        self.FLlayer= QHBoxLayout(self)
+        self.FLlayer.addLayout(self.FlLayout1)
+        self.FLlayer.addLayout(self.FlBtnLayout)
+        #self.GroupBox2.setLayout(self.FLlayer)
+
+        #self.FLLayout = QHBoxLayout(self)
+        #self.FLlayer.addWidget(self.GroupBox2)
+
+        self.BigLayout = QVBoxLayout(self)
+        self.BigLayout.addLayout(self.PlLayer)
+        #self.BigLayout.addLayout(self.TableLayout)
+        self.BigLayout.addLayout(self.FLlayer)
+
+        self.setLayout(self.BigLayout)
+
+
+    """
     def comboBox_Activated(self):
 
         self.positionValue = self.comboBox.currentText()  # positionValue를 통해 선택한 포지션 값을 전달
@@ -165,9 +157,8 @@ class MainWindow(QWidget):
                     item = QTableWidgetItem(str(v))
 
                 self.tableWidget.setItem(rowIDX, columnIDX, item)
-
         self.tableWidget.resizeColumnsToContents()
-        self.tableWidget.resizeRowsToContents()
+        self.tableWidget.resizeRowsToContents()"""
 
 #########################################
 
