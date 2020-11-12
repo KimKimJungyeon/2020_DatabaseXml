@@ -1,6 +1,6 @@
 import sys, datetime
 from PyQt5.QtWidgets import *
-import Report1.DBSearch as DBSearch
+#import Report1.DBSearch as DBSearch
 
 
 #Main window구현
@@ -53,12 +53,12 @@ class MainWindow(QWidget):
         #self.SaveBtn.clicked.connect(self.pushButton_Clicked)
 
         # 테이블위젯 설정
-        #self.tableWidget = QTableWidget(self)   # QTableWidget 객체 생성
+        self.tableWidget = QTableWidget(self)   # QTableWidget 객체 생성
         #self.tableWidget.resize(1000, 500)
 
         # 레이아웃 생성 ====================================================
-        #self.GroupBox1 = QGroupBox("선수검색") # 선수검색들 묶어둘 녀석
-
+        self.GroupBox1 = QGroupBox("선수검색") # 선수검색들 묶어둘 녀석
+        self.BigLayout = QVBoxLayout(self)
         self.PlLayout1 = QHBoxLayout(self) #선수검색 첫번째줄(팀명~출신국 까지)
         self.PlLayout1.addWidget(self.TeamnameLabel)
         self.PlLayout1.addWidget(self.TeamnameCbbox)
@@ -77,7 +77,7 @@ class MainWindow(QWidget):
         self.PlLayout2.addWidget(self.WeightUpBtn)
         self.PlLayout2.addWidget(self.WeightDnBtn)
 
-        self.PlInputLayout = QHBoxLayout(self) #선수검색(입력용)
+        self.PlInputLayout = QVBoxLayout(self) #선수검색(입력용)
         self.PlInputLayout.addLayout(self.PlLayout1)
         self.PlInputLayout.addLayout(self.PlLayout2)
 
@@ -93,15 +93,15 @@ class MainWindow(QWidget):
         self.PlLayer= QHBoxLayout(self)
         self.PlLayer.addLayout(self.PlInputLayout)
         self.PlLayer.addLayout(self.PlBtnLayout)
-        #self.GroupBox1.setLayout(self.PlLayer)
+        self.GroupBox1.setLayout(self.PlLayer)
 
-        #self.PLLayout = QHBoxLayout(self)
-        #self.PLLayout.addWidget(self.GroupBox1)
+        self.PLLayout = QHBoxLayout(self)
+        self.PLLayout.addWidget(self.GroupBox1)
 
-        #self.TableLayout = QHBoxLayout(self) #결과창 나올부분
-        #self.TableLayout.addWidget(self.tableWidget)
+        self.TableLayout = QHBoxLayout(self) #결과창 나올부분
+        self.TableLayout.addWidget(self.tableWidget)
 
-        #self.GroupBox2= QGroupBox("파일 출력")
+        self.GroupBox2= QGroupBox("파일 출력")
 
         self.FlLayout1= QHBoxLayout(self)
         self.FlLayout1.addWidget(self.CsvRdbtn)
@@ -113,49 +113,41 @@ class MainWindow(QWidget):
         self.FLlayer= QHBoxLayout(self)
         self.FLlayer.addLayout(self.FlLayout1)
         self.FLlayer.addLayout(self.FlBtnLayout)
-        #self.GroupBox2.setLayout(self.FLlayer)
+        self.GroupBox2.setLayout(self.FLlayer)
 
-        #self.FLLayout = QHBoxLayout(self)
-        #self.FLlayer.addWidget(self.GroupBox2)
+        self.FLLayout = QHBoxLayout(self)
+        self.FLLayout.addWidget(self.GroupBox2)
 
-        self.BigLayout = QVBoxLayout(self)
-        self.BigLayout.addLayout(self.PlLayer)
-        #self.BigLayout.addLayout(self.TableLayout)
-        self.BigLayout.addLayout(self.FLlayer)
+        self.BigLayout.addLayout(self.PLLayout)
+        self.BigLayout.addLayout(self.TableLayout)
+        self.BigLayout.addLayout(self.FLLayout)
 
         self.setLayout(self.BigLayout)
 
 
     """
     def comboBox_Activated(self):
-
         self.positionValue = self.comboBox.currentText()  # positionValue를 통해 선택한 포지션 값을 전달
-
     def pushButton_Clicked(self):
         # DB 검색문 실행
         query = DB_Query()
         players = query.selectPlayer(self.positionValue)
-
         self.tableWidget.clearContents()
         self.tableWidget.setRowCount(len(players))
         self.tableWidget.setColumnCount(len(players[0]))
         columnNames = list(players[0].keys())
         self.tableWidget.setHorizontalHeaderLabels(columnNames)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
-
         for rowIDX in range(len(players)):
             player = players[rowIDX]
-
             for k, v in player.items():
                 columnIDX = columnNames.index(k)
-
                 if v == None:           # 파이썬이 DB의 널값을 None으로 변환함.
                     continue            # QTableWidgetItem 객체를 생성하지 않음
                 elif isinstance(v, datetime.date):      # QTableWidgetItem 객체 생성
                     item = QTableWidgetItem(v.strftime('%Y-%m-%d'))
                 else:
                     item = QTableWidgetItem(str(v))
-
                 self.tableWidget.setItem(rowIDX, columnIDX, item)
         self.tableWidget.resizeColumnsToContents()
         self.tableWidget.resizeRowsToContents()"""
@@ -167,4 +159,3 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     app.exec_()
-
