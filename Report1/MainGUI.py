@@ -1,6 +1,6 @@
 import sys, datetime
 from PyQt5.QtWidgets import *
-#import Report1.DBSearch as DBSearch
+import Report1.DBSearch as DBSearch
 
 
 #Main window구현
@@ -11,7 +11,7 @@ class MainWindow(QWidget):
 
     def setupUI(self):
         self.setWindowTitle("Report")
-        self.setGeometry(400, 200, 1100, 800)  # 위치, 크기 세팅
+        self.setGeometry(500, 100, 700, 800)  # 위치, 크기 세팅
 
         # 기본적으로 필요한 모든 위젯 생성
 
@@ -38,6 +38,8 @@ class MainWindow(QWidget):
         # 라디오버튼 모음
         self.HeightUpBtn = QRadioButton("이상", self)  # 키의 이상
         self.HeightDnBtn = QRadioButton("이하", self)  # 키의 이하
+
+        #라디오 버튼 모음2
         self.WeightUpBtn = QRadioButton("이상", self)  # 몸무게의 이상
         self.WeightDnBtn = QRadioButton("이하", self)  # 몸무게의 이하
 
@@ -68,14 +70,24 @@ class MainWindow(QWidget):
         self.PlLayout1.addWidget(self.CountryCbbox)
 
         self.PlLayout2 = QHBoxLayout(self) #선수검색 두번째줄(키~ 몸무게)
-        self.PlLayout2.addWidget(self.HeightLabel)
-        self.PlLayout2.addWidget(self.HeightCbbox)
-        self.PlLayout2.addWidget(self.HeightUpBtn)
-        self.PlLayout2.addWidget(self.HeightDnBtn)
-        self.PlLayout2.addWidget(self.WeightLabel)
-        self.PlLayout2.addWidget(self.WeightCbbox)
-        self.PlLayout2.addWidget(self.WeightUpBtn)
-        self.PlLayout2.addWidget(self.WeightDnBtn)
+        self.HgtGroupBox = QGroupBox()  # 키 이상,이하 체크때문에 나눔
+        self.HgtLayout = QHBoxLayout(self)#키 세팅
+        self.HgtLayout.addWidget(self.HeightLabel)
+        self.HgtLayout.addWidget(self.HeightCbbox)
+        self.HgtLayout.addWidget(self.HeightUpBtn)
+        self.HgtLayout.addWidget(self.HeightDnBtn)
+        self.HgtGroupBox.setLayout(self.HgtLayout)
+
+        self.WgtGroupBox= QGroupBox() #몸무게 이상, 이하 체크때문에 나눔
+        self.WgtLayout = QHBoxLayout(self)#몸무게 세팅
+        self.WgtLayout.addWidget(self.WeightLabel)
+        self.WgtLayout.addWidget(self.WeightCbbox)
+        self.WgtLayout.addWidget(self.WeightUpBtn)
+        self.WgtLayout.addWidget(self.WeightDnBtn)
+        self.WgtGroupBox.setLayout(self.WgtLayout)
+
+        self.PlLayout2.addWidget(self.HgtGroupBox)
+        self.PlLayout2.addWidget(self.WgtGroupBox)
 
         self.PlInputLayout = QVBoxLayout(self) #선수검색(입력용)
         self.PlInputLayout.addLayout(self.PlLayout1)
